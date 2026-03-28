@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharmaceutical Analysis Toolkit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #f0ede8;
+    --surface: #faf8f5;
+    --card: #ffffff;
+    --ink: #1a1714;
+    --ink-muted: #6b6460;
+    --ink-faint: #b8b2ac;
+    --accent: #c8502a;
+    --accent-light: #f5e8e3;
+    --accent-dark: #9e3a1c;
+    --green: #2a7a4f;
+    --green-light: #e3f5ec;
+    --border: #e2ddd8;
+    --shadow: 0 2px 12px rgba(26,23,20,0.08), 0 1px 3px rgba(26,23,20,0.05);
+    --shadow-lg: 0 8px 40px rgba(26,23,20,0.12), 0 2px 8px rgba(26,23,20,0.06);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 48px 24px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 20% 50%, rgba(200,80,42,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 70% at 80% 30%, rgba(42,122,79,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 32px;
+    background: var(--bg);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+  .header-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(200,80,42,0.15);
+    border: 1px solid rgba(200,80,42,0.3);
+    border-radius: 100px;
+    padding: 4px 12px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  h1 em {
+    font-style: italic;
+    color: #e8a88e;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    position: relative;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── SELECTOR CARD ── */
+  .selector-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 32px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+  .selector-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .select-wrap {
+    position: relative;
+  }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    pointer-events: none;
+    font-size: 14px;
+  }
+  select {
+    width: 100%;
+    padding: 14px 44px 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(200,80,42,0.12);
+  }
+
+  /* ── FORMULA BADGE ── */
+  .formula-badge {
+    display: none;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--ink);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #e8a88e;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+  }
+  .formula-badge.visible { display: block; }
+  .formula-badge strong {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 4px;
+  }
+
+  /* ── CALCULATOR CARD ── */
+  .calc-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .calc-card.entering {
+    animation: slideIn 0.3s ease forwards;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .calc-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .calc-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--accent-light);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .calc-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .calc-desc {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-top: 3px;
+    line-height: 1.4;
+    font-weight: 300;
+  }
+
+  /* ── INPUTS ── */
+  .calc-body { padding: 24px 28px; }
+
+  .input-group {
+    margin-bottom: 18px;
+  }
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .input-group input,
+  .input-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-group input:focus,
+  .input-group select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(200,80,42,0.1);
+    background: #fff;
+  }
+  .input-group input.error {
+    border-color: #e05252;
+    box-shadow: 0 0 0 3px rgba(224,82,82,0.1);
+  }
+  .input-hint {
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* grid layouts */
+  .inputs-grid {
+    display: grid;
+    gap: 16px;
+  }
+  .inputs-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .inputs-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 520px) {
+    .inputs-grid.cols-2,
+    .inputs-grid.cols-3 { grid-template-columns: 1fr; }
+  }
+
+  /* segment control (for dilution / % type) */
+  .segment-wrap {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .seg-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--ink-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .seg-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(200,80,42,0.3);
+  }
+  .seg-btn:hover:not(.active) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* dilution "unknown" note */
+  .dilution-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-family: 'DM Mono', monospace;
+    line-height: 1.5;
+  }
+
+  /* ── CALCULATE BUTTON ── */
+  .calc-footer { padding: 0 28px 28px; }
+  .btn-calc {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(200,80,42,0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-calc::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .btn-calc:hover {
+    background: var(--accent-dark);
+    box-shadow: 0 6px 20px rgba(200,80,42,0.45);
+    transform: translateY(-1px);
+  }
+  .btn-calc:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(200,80,42,0.3);
+  }
+
+  /* ── RESULT AREA ── */
+  .result-card {
+    margin-top: 20px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    display: none;
+    animation: fadeUp 0.3s ease forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .result-card.visible { display: block; }
+  .result-card.error-state .result-header { background: #fef2f2; }
+  .result-card.error-state .result-header-label { color: #e05252; }
+
+  .result-header {
+    background: var(--green-light);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(42,122,79,0.15);
+  }
+  .result-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+  .result-card.error-state .result-dot { background: #e05252; }
+  .result-header-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 500;
+  }
+  .result-body { padding: 20px 24px; background: #fff; }
+
+  /* result items */
+  .result-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--bg);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .result-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .result-label {
+    font-size: 13px;
+    color: var(--ink-muted);
+    font-weight: 400;
+    flex-shrink: 0;
+  }
+  .result-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    text-align: right;
+  }
+  .result-value span {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-left: 4px;
+    font-weight: 300;
+  }
+  .result-primary .result-value {
+    font-size: 26px;
+    color: var(--accent);
+  }
+  .result-note {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent-light);
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .error-msg {
+    color: #e05252;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  footer a { color: var(--ink-muted); text-decoration: none; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">⚗ Analytical Tools</div>
+  <h1>Pharmaceutical <em>Analysis</em> Toolkit</h1>
+  <p class="subtitle">Calculators for Dosage · Dilution · Compounding &amp; More</p>
+</header>
+
+<main>
+
+  <!-- Selector -->
+  <div class="selector-card">
+    <span class="selector-label">Select Calculator</span>
+    <div class="select-wrap">
+      <select id="calcSelect">
+        <option value="">— Choose a calculation —</option>
+        <option value="dilution">1. Dilution  (C₁V₁ = C₂V₂)</option>
+        <option value="dosage">2. Dosage Based on Weight</option>
+        <option value="molarity">3. Molarity &amp; Mass</option>
+        <option value="percent">4. Percentage Concentration</option>
+        <option value="flowrate">5. IV Flow Rate (Drip)</option>
+        <option value="halflife">6. Half-Life &amp; Elimination Rate</option>
+        <option value="bsa">7. Body Surface Area (Mosteller)</option>
+        <option value="compound">8. Extemporaneous Compounding</option>
+      </select>
+    </div>
+    <div class="formula-badge" id="formulaBadge">
+      <strong>Formula</strong>
+      <span id="formulaText"></span>
+    </div>
+  </div>
+
+  <!-- Dynamic calculator area -->
+  <div id="calcArea"></div>
+
+  <!-- Result -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-dot"></div>
+      <div class="result-header-label" id="resultHeaderLabel">Result</div>
+    </div>
+    <div class="result-body" id="resultBody"></div>
+  </div>
+
+</main>
+
+<footer>
+  For educational use only — always verify critical clinical calculations with a licensed professional.
+</footer>
+
+<script>
+/* =========================================================
+   CALCULATOR DEFINITIONS
+   ========================================================= */
+const CALCS = {
+  dilution: {
+    icon: '⬦',
+    title: 'Dilution Calculator',
+    desc: 'Solve for any unknown in C₁V₁ = C₂V₂',
+    formula: 'C₁ × V₁ = C₂ × V₂  →  solve for the blank field',
+    render: renderDilution,
+    calculate: calcDilution
+  },
+  dosage: {
+    icon: '💊',
+    title: 'Dosage by Weight',
+    desc: 'Total daily dose and per-administration dose',
+    formula: 'Total daily dose = weight × dose_rate  |  Per dose = TDD ÷ frequency',
+    render: renderDosage,
+    calculate: calcDosage
+  },
+  molarity: {
+    icon: '🧪',
+    title: 'Molarity & Mass',
+    desc: 'Mass of solute needed for a target molar solution',
+    formula: 'mass (g) = Molarity (mol/L) × Volume (L) × MW (g/mol)',
+    render: renderMolarity,
+    calculate: calcMolarity
+  },
+  percent: {
+    icon: '%',
+    title: 'Percentage Concentration',
+    desc: '% w/v, % w/w, or % v/v',
+    formula: '% = (solute amount ÷ solution amount) × 100',
+    render: renderPercent,
+    calculate: calcPercent
+  },
+  flowrate: {
+    icon: '💧',
+    title: 'IV Drip Flow Rate',
+    desc: 'Drops per minute and mL per hour',
+    formula: 'Flow (drops/min) = (volume × drop factor) ÷ (time_hrs × 60)',
+    render: renderFlowrate,
+    calculate: calcFlowrate
+  },
+  halflife: {
+    icon: '⏱',
+    title: 'Half-Life & Elimination',
+    desc: 'Elimination rate constant k and t½',
+    formula: 'k = (ln C₀ − ln Cₜ) ÷ t  |  t½ = ln(2) ÷ k',
+    render: renderHalflife,
+    calculate: calcHalflife
+  },
+  bsa: {
+    icon: '⧖',
+    title: 'Body Surface Area',
+    desc: 'Mosteller formula',
+    formula: 'BSA (m²) = √( (height_cm × weight_kg) ÷ 3600 )',
+    render: renderBSA,
+    calculate: calcBSA
+  },
+  compound: {
+    icon: '⚗',
+    title: 'Extemporaneous Compounding',
+    desc: 'Active ingredient and vehicle/base quantities',
+    formula: 'Active = (desired% ÷ 100) × total qty  |  Base = total qty − Active',
+    render: renderCompound,
+    calculate: calcCompound
+  }
+};
+
+/* =========================================================
+   RENDER FUNCTIONS — return HTML string for the calc body
+   ========================================================= */
+
+function renderDilution() {
+  return `
+    <div class="calc-body">
+      <div class="dilution-note">
+        Leave <strong>exactly one</strong> field blank — it will be calculated.
+      </div>
+      <div class="inputs-grid cols-2">
+        <div class="input-group">
+          <label>C₁ — Initial Concentration</label>
+          <input type="number" id="c1" placeholder="e.g. 5.0" min="0" step="any">
+          <div class="input-hint">any consistent unit</div>
+        </div>
+        <div class="input-group">
+          <label>V₁ — Initial Volume</label>
+          <input type="number" id="v1" placeholder="e.g. 20" min="0" step="any">
+          <div class="input-hint">mL / L</div>
+        </div>
+        <div class="input-group">
+          <label>C₂ — Final Concentration</label>
+          <input type="number" id="c2" placeholder="e.g. 1.0" min="0" step="any">
+          <div class="input-hint">same unit as C₁</div>
+        </div>
+        <div class="input-group">
+          <label>V₂ — Final Volume</label>
+          <input type="number" id="v2" placeholder="e.g. 100" min="0" step="any">
+          <div class="input-hint">same unit as V₁</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderDosage() {
+  return `
+    <div class="calc-body">
+      <div class="inputs-grid cols-2">
+        <div class="input-group">
+          <label>Patient Weight</label>
+          <input type="number" id="weight" placeholder="e.g. 70" min="0.1" step="any">
+          <div class="input-hint">kg</div>
+        </div>
+        <div class="input-group">
+          <label>Dose Rate</label>
+          <input type="number" id="doseRate" placeholder="e.g. 10" min="0" step="any">
+          <div class="input-hint">mg / kg / day</div>
+        </div>
+        <div class="input-group">
+          <label>Frequency</label>
+          <input type="number" id="freq" placeholder="e.g. 3" min="1" step="1">
+          <div class="input-hint">times per day</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderMolarity() {
+  return `
+    <div class="calc-body">
+      <div class="inputs-grid cols-3">
+        <div class="input-group">
+          <label>Target Molarity</label>
+          <input type="number" id="molarity" placeholder="e.g. 0.5" min="0" step="any">
+          <div class="input-hint">mol / L</div>
+        </div>
+        <div class="input-group">
+          <label>Volume Required</label>
+          <input type="number" id="volume" placeholder="e.g. 1.0" min="0" step="any">
+          <div class="input-hint">L</div>
+        </div>
+        <div class="input-group">
+          <label>Molecular Weight</label>
+          <input type="number" id="mw" placeholder="e.g. 342.3" min="0" step="any">
+          <div class="input-hint">g / mol</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderPercent() {
+  return `
+    <div class="calc-body">
+      <div class="segment-wrap" id="pctSeg">
+        <button class="seg-btn active" data-type="wv">% w/v</button>
+        <button class="seg-btn" data-type="ww">% w/w</button>
+        <button class="seg-btn" data-type="vv">% v/v</button>
+      </div>
+      <div id="pctInputs"></div>
+    </div>`;
+}
+
+function renderFlowrate() {
+  return `
+    <div class="calc-body">
+      <div class="inputs-grid cols-3">
+        <div class="input-group">
+          <label>Total Volume</label>
+          <input type="number" id="ivVol" placeholder="e.g. 500" min="0" step="any">
+          <div class="input-hint">mL</div>
+        </div>
+        <div class="input-group">
+          <label>Infusion Time</label>
+          <input type="number" id="ivTime" placeholder="e.g. 8" min="0" step="any">
+          <div class="input-hint">hours</div>
+        </div>
+        <div class="input-group">
+          <label>Drop Factor</label>
+          <input type="number" id="dropFactor" placeholder="e.g. 20" min="1" step="1">
+          <div class="input-hint">drops / mL</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderHalflife() {
+  return `
+    <div class="calc-body">
+      <div class="inputs-grid cols-3">
+        <div class="input-group">
+          <label>Initial Concentration (C₀)</label>
+          <input type="number" id="c0" placeholder="e.g. 100" min="0" step="any">
+          <div class="input-hint">any unit</div>
+        </div>
+        <div class="input-group">
+          <label>Concentration at Time t (Cₜ)</label>
+          <input type="number" id="ct" placeholder="e.g. 25" min="0" step="any">
+          <div class="input-hint">same unit</div>
+        </div>
+        <div class="input-group">
+          <label>Time Elapsed (t)</label>
+          <input type="number" id="te" placeholder="e.g. 4" min="0" step="any">
+          <div class="input-hint">hours</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderBSA() {
+  return `
+    <div class="calc-body">
+      <div class="inputs-grid cols-2">
+        <div class="input-group">
+          <label>Height</label>
+          <input type="number" id="height" placeholder="e.g. 170" min="1" step="any">
+          <div class="input-hint">cm</div>
+        </div>
+        <div class="input-group">
+          <label>Weight</label>
+          <input type="number" id="bsaWeight" placeholder="e.g. 70" min="0.1" step="any">
+          <div class="input-hint">kg</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderCompound() {
+  return `
+    <div class="calc-body">
+      <div class="segment-wrap" id="cmpSeg">
+        <button class="seg-btn active" data-type="wv">w/v (g in mL)</button>
+        <button class="seg-btn" data-type="ww">w/w (g in g)</button>
+      </div>
+      <div class="inputs-grid cols-3">
+        <div class="input-group">
+          <label>Total Quantity</label>
+          <input type="number" id="totalQty" placeholder="e.g. 100" min="0" step="any">
+          <div class="input-hint">g or mL</div>
+        </div>
+        <div class="input-group">
+          <label>Desired Concentration</label>
+          <input type="number" id="desiredConc" placeholder="e.g. 2" min="0" max="100" step="any">
+          <div class="input-hint">% (of active)</div>
+        </div>
+        <div class="input-group">
+          <label>Stock / Raw Material Conc.</label>
+          <input type="number" id="stockConc" placeholder="e.g. 100" min="0" max="100" step="any">
+          <div class="input-hint">% (pure = 100)</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   PERCENT SUB-INPUTS
+   ========================================================= */
+const PCT_INPUTS = {
+  wv: `<div class="inputs-grid cols-2">
+    <div class="input-group"><label>Mass of Solute</label>
+      <input type="number" id="pctA" placeholder="e.g. 5" min="0" step="any">
+      <div class="input-hint">g</div></div>
+    <div class="input-group"><label>Volume of Solution</label>
+      <input type="number" id="pctB" placeholder="e.g. 100" min="0" step="any">
+      <div class="input-hint">mL</div></div>
+  </div>`,
+  ww: `<div class="inputs-grid cols-2">
+    <div class="input-group"><label>Mass of Solute</label>
+      <input type="number" id="pctA" placeholder="e.g. 5" min="0" step="any">
+      <div class="input-hint">g</div></div>
+    <div class="input-group"><label>Mass of Solution</label>
+      <input type="number" id="pctB" placeholder="e.g. 100" min="0" step="any">
+      <div class="input-hint">g</div></div>
+  </div>`,
+  vv: `<div class="inputs-grid cols-2">
+    <div class="input-group"><label>Volume of Solute</label>
+      <input type="number" id="pctA" placeholder="e.g. 5" min="0" step="any">
+      <div class="input-hint">mL</div></div>
+    <div class="input-group"><label>Volume of Solution</label>
+      <input type="number" id="pctB" placeholder="e.g. 100" min="0" step="any">
+      <div class="input-hint">mL</div></div>
+  </div>`
+};
+
+/* =========================================================
+   CALCULATION FUNCTIONS
+   ========================================================= */
+
+function getNum(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const v = parseFloat(el.value);
+  return (el.value.trim() === '' || isNaN(v)) ? null : v;
+}
+function isBlank(id) {
+  const el = document.getElementById(id);
+  return !el || el.value.trim() === '';
+}
+function fmt(n, d = 4) {
+  if (n === null || isNaN(n)) return '—';
+  // remove unnecessary trailing zeros
+  const s = parseFloat(n.toFixed(d)).toString();
+  return s;
+}
+
+/* ── 1. DILUTION ── */
+function calcDilution() {
+  const fields = ['c1','v1','c2','v2'];
+  const blanks = fields.filter(isBlank);
+  const vals   = { c1: getNum('c1'), v1: getNum('v1'), c2: getNum('c2'), v2: getNum('v2') };
+
+  if (blanks.length !== 1) return { error: 'Leave exactly one field blank to solve for it.' };
+  const unknown = blanks[0];
+  const { c1, v1, c2, v2 } = vals;
+
+  let result;
+  if (unknown === 'c1') {
+    if (!c2 || !v2 || !v1 || v1 === 0) return { error: 'V1 must be non-zero.' };
+    result = (c2 * v2) / v1;
+    return { items: [{ label: 'C₁ (calculated)', value: fmt(result), unit: 'conc unit', primary: true },
+                     { label: 'Verification: C₁×V₁', value: fmt(result * v1), unit: '' }], note: 'C₁ was the unknown.' };
+  }
+  if (unknown === 'v1') {
+    if (!c1 || c1 === 0) return { error: 'C₁ must be non-zero.' };
+    result = (c2 * v2) / c1;
+    return { items: [{ label: 'V₁ (calculated)', value: fmt(result), unit: 'vol unit', primary: true }], note: 'V₁ was the unknown.' };
+  }
+  if (unknown === 'c2') {
+    if (!v2 || v2 === 0) return { error: 'V₂ must be non-zero.' };
+    result = (c1 * v1) / v2;
+    return { items: [{ label: 'C₂ (calculated)', value: fmt(result), unit: 'conc unit', primary: true }], note: 'C₂ was the unknown.' };
+  }
+  if (unknown === 'v2') {
+    if (!c2 || c2 === 0) return { error: 'C₂ must be non-zero.' };
+    result = (c1 * v1) / c2;
+    return { items: [{ label: 'V₂ (calculated)', value: fmt(result), unit: 'vol unit', primary: true }], note: 'V₂ was the unknown. This is the final volume needed.' };
+  }
+}
+
+/* ── 2. DOSAGE ── */
+function calcDosage() {
+  const weight = getNum('weight'), doseRate = getNum('doseRate'), freq = getNum('freq');
+  if (!weight || weight <= 0) return { error: 'Enter a valid patient weight (kg).' };
+  if (!doseRate || doseRate < 0) return { error: 'Enter a valid dose rate (mg/kg/day).' };
+  if (!freq || freq < 1) return { error: 'Frequency must be ≥ 1.' };
+  const tdd = weight * doseRate;
+  const perDose = tdd / freq;
+  return {
+    items: [
+      { label: 'Total Daily Dose', value: fmt(tdd, 2), unit: 'mg / day', primary: true },
+      { label: 'Dose per Administration', value: fmt(perDose, 2), unit: 'mg' }
+    ],
+    note: `Calculated for a ${weight} kg patient receiving ${doseRate} mg/kg/day in ${freq} divided dose(s).`
+  };
+}
+
+/* ── 3. MOLARITY ── */
+function calcMolarity() {
+  const mol = getNum('molarity'), vol = getNum('volume'), mw = getNum('mw');
+  if (!mol || mol < 0) return { error: 'Enter a valid molarity (mol/L).' };
+  if (!vol || vol <= 0) return { error: 'Enter a valid volume (L).' };
+  if (!mw || mw <= 0) return { error: 'Enter a valid molecular weight (g/mol).' };
+  const massG = mol * vol * mw;
+  const massMg = massG * 1000;
+  return {
+    items: [
+      { label: 'Mass Required', value: fmt(massG, 4), unit: 'g', primary: true },
+      { label: 'Equivalent', value: fmt(massMg, 2), unit: 'mg' }
+    ],
+    note: `Weigh ${fmt(massG,4)} g and dissolve in ${vol} L to achieve ${mol} mol/L.`
+  };
+}
+
+/* ── 4. PERCENT ── */
+function calcPercent() {
+  const pctType = document.querySelector('#pctSeg .seg-btn.active')?.dataset.type || 'wv';
+  const a = getNum('pctA'), b = getNum('pctB');
+  if (!a || a < 0) return { error: 'Enter the solute amount.' };
+  if (!b || b <= 0) return { error: 'Solution amount must be > 0.' };
+  const pct = (a / b) * 100;
+  const labels = { wv: ['% w/v', 'g', 'mL'], ww: ['% w/w', 'g', 'g'], vv: ['% v/v', 'mL', 'mL'] };
+  const [notation, uA, uB] = labels[pctType];
+  return {
+    items: [
+      { label: `Concentration (${notation})`, value: fmt(pct, 4), unit: notation, primary: true }
+    ],
+    note: `${fmt(a)} ${uA} of solute in ${fmt(b)} ${uB} of solution.`
+  };
+}
+
+/* ── 5. FLOW RATE ── */
+function calcFlowrate() {
+  const vol = getNum('ivVol'), time = getNum('ivTime'), drop = getNum('dropFactor');
+  if (!vol || vol <= 0) return { error: 'Volume must be > 0 mL.' };
+  if (!time || time <= 0) return { error: 'Time must be > 0 hours.' };
+  if (!drop || drop <= 0) return { error: 'Drop factor must be > 0 drops/mL.' };
+  const flowDrops = (vol * drop) / (time * 60);
+  const mlPerHr = vol / time;
+  return {
+    items: [
+      { label: 'Flow Rate', value: fmt(flowDrops, 1), unit: 'drops / min', primary: true },
+      { label: 'Infusion Rate', value: fmt(mlPerHr, 1), unit: 'mL / hr' }
+    ],
+    note: `Rounded to nearest drop: ${Math.round(flowDrops)} drops/min. Verify with clinical protocol.`
+  };
+}
+
+/* ── 6. HALF-LIFE ── */
+function calcHalflife() {
+  const c0 = getNum('c0'), ct = getNum('ct'), t = getNum('te');
+  if (!c0 || c0 <= 0) return { error: 'C₀ must be > 0.' };
+  if (!ct || ct <= 0) return { error: 'Cₜ must be > 0.' };
+  if (ct >= c0) return { error: 'Cₜ must be less than C₀ (drug is being eliminated).' };
+  if (!t || t <= 0) return { error: 'Time elapsed must be > 0 hours.' };
+  const k = (Math.log(c0) - Math.log(ct)) / t;
+  const t12 = Math.LN2 / k;
+  let note = `Elimination rate constant k = ${fmt(k, 5)} h⁻¹.`;
+  if (t12 > 72) note += ' ⚠ Unusually long half-life — verify inputs.';
+  if (t12 < 0.1) note += ' ⚠ Very short half-life — verify inputs.';
+  return {
+    items: [
+      { label: 'Half-Life (t½)', value: fmt(t12, 3), unit: 'hours', primary: true },
+      { label: 'Elimination Rate Constant k', value: fmt(k, 6), unit: 'h⁻¹' }
+    ],
+    note
+  };
+}
+
+/* ── 7. BSA ── */
+function calcBSA() {
+  const h = getNum('height'), w = getNum('bsaWeight');
+  if (!h || h <= 0) return { error: 'Enter a valid height (cm).' };
+  if (!w || w <= 0) return { error: 'Enter a valid weight (kg).' };
+  const bsa = Math.sqrt((h * w) / 3600);
+  let note = `BSA ${fmt(bsa, 3)} m². `;
+  if (bsa < 0.25) note += 'Very low BSA — check values.';
+  else if (bsa < 1.2) note += 'Typical pediatric/neonatal range.';
+  else if (bsa <= 2.1) note += 'Typical adult range (1.6–1.9 m²). Commonly used for chemotherapy dosing.';
+  else note += 'High BSA — confirm inputs.';
+  return {
+    items: [{ label: 'Body Surface Area', value: fmt(bsa, 4), unit: 'm²', primary: true }],
+    note
+  };
+}
+
+/* ── 8. COMPOUNDING ── */
+function calcCompound() {
+  const total = getNum('totalQty'), desired = getNum('desiredConc'), stock = getNum('stockConc');
+  const type = document.querySelector('#cmpSeg .seg-btn.active')?.dataset.type || 'wv';
+  const unitA = type === 'wv' ? 'g' : 'g';
+  const unitB = type === 'wv' ? 'mL' : 'g';
+  if (!total || total <= 0) return { error: 'Total quantity must be > 0.' };
+  if (desired === null || desired < 0 || desired > 100) return { error: 'Desired concentration must be 0–100%.' };
+  if (!stock || stock <= 0 || stock > 100) return { error: 'Stock concentration must be 0–100%.' };
+  if (desired > stock) return { error: 'Desired concentration cannot exceed stock concentration.' };
+  const activeNeeded = (desired / 100) * total;
+  const activeFromStock = stock < 100 ? activeNeeded / (stock / 100) : activeNeeded;
+  const vehicleNeeded = total - activeFromStock;
+  if (vehicleNeeded < 0) return { error: 'Not achievable with given stock — desired conc too high for stock.' };
+  return {
+    items: [
+      { label: `${stock < 100 ? 'Stock to add' : 'Active ingredient'}`, value: fmt(activeFromStock, 3), unit: unitA, primary: true },
+      { label: 'Vehicle / Base to add', value: fmt(vehicleNeeded, 3), unit: unitB },
+      { label: 'Final quantity', value: fmt(total, 2), unit: unitB }
+    ],
+    note: `Yields ${desired}% (${type === 'wv' ? 'w/v' : 'w/w'}) preparation. Verify compatibility of components.`
+  };
+}
+
+/* =========================================================
+   BUILD RESULT HTML
+   ========================================================= */
+function buildResult(res) {
+  const card = document.getElementById('resultCard');
+  const label = document.getElementById('resultHeaderLabel');
+  const body  = document.getElementById('resultBody');
+
+  if (res.error) {
+    card.classList.add('error-state');
+    label.textContent = 'Input Error';
+    body.innerHTML = `<p class="error-msg">⚠ ${res.error}</p>`;
+  } else {
+    card.classList.remove('error-state');
+    label.textContent = 'Result';
+    let html = '';
+    res.items.forEach(item => {
+      html += `<div class="result-item${item.primary ? ' result-primary' : ''}">
+        <span class="result-label">${item.label}</span>
+        <span class="result-value">${item.value}<span>${item.unit}</span></span>
+      </div>`;
+    });
+    if (res.note) html += `<div class="result-note">${res.note}</div>`;
+    body.innerHTML = html;
+  }
+
+  card.classList.remove('visible');
+  void card.offsetWidth; // reflow for re-animation
+  card.classList.add('visible');
+}
+
+/* =========================================================
+   SELECTOR CHANGE
+   ========================================================= */
+document.getElementById('calcSelect').addEventListener('change', function () {
+  const key = this.value;
+  const area  = document.getElementById('calcArea');
+  const badge = document.getElementById('formulaBadge');
+  const resultCard = document.getElementById('resultCard');
+
+  resultCard.classList.remove('visible');
+
+  if (!key || !CALCS[key]) {
+    area.innerHTML = '';
+    badge.classList.remove('visible');
+    return;
+  }
+
+  const c = CALCS[key];
+
+  // Formula badge
+  document.getElementById('formulaText').textContent = c.formula;
+  badge.classList.add('visible');
+
+  // Render card
+  area.innerHTML = `
+    <div class="calc-card entering">
+      <div class="calc-header">
+        <div class="calc-icon">${c.icon}</div>
+        <div>
+          <div class="calc-title">${c.title}</div>
+          <div class="calc-desc">${c.desc}</div>
+        </div>
+      </div>
+      ${c.render()}
+      <div class="calc-footer">
+        <button class="btn-calc" id="calcBtn">Calculate</button>
+      </div>
+    </div>`;
+
+  // Post-render setup
+  postRenderSetup(key);
+
+  document.getElementById('calcBtn').addEventListener('click', () => {
+    const res = c.calculate();
+    buildResult(res);
+  });
+
+  // Also allow Enter key
+  area.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('calcBtn').click();
+    });
+  });
+});
+
+/* =========================================================
+   POST-RENDER SETUP (segment controls etc.)
+   ========================================================= */
+function postRenderSetup(key) {
+  if (key === 'percent') {
+    setupSegment('pctSeg', type => {
+      document.getElementById('pctInputs').innerHTML = PCT_INPUTS[type];
+    }, 'wv');
+  }
+  if (key === 'compound') {
+    setupSegment('cmpSeg', () => {}, 'wv');
+  }
+}
+
+function setupSegment(segId, onChange, defaultType) {
+  const wrap = document.getElementById(segId);
+  if (!wrap) return;
+  // Init default
+  const defaultEl = wrap.querySelector(`[data-type="${defaultType}"]`);
+  if (defaultEl) onChange(defaultType);
+
+  // Percent: init inputs
+  if (segId === 'pctSeg') {
+    document.getElementById('pctInputs').innerHTML = PCT_INPUTS[defaultType];
+  }
+
+  wrap.querySelectorAll('.seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      onChange(btn.dataset.type);
+      if (segId === 'pctSeg') {
+        document.getElementById('pctInputs').innerHTML = PCT_INPUTS[btn.dataset.type];
+      }
+      document.getElementById('resultCard').classList.remove('visible');
+    });
+  });
+}
+</script>
+</body>
+</html>
